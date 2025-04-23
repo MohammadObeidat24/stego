@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Location toggle
     document.getElementById('enableLocation').addEventListener('change', function() {
         if (this.checked && !navigator.geolocation) {
-            alert('Geolocation is not supported by your browser')
+            showAlert('error', 'Geolocation is not supported by your browser')
             this.checked = false
         }
     })
@@ -35,41 +35,24 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('hideForm').addEventListener('submit', async function(e) {
         e.preventDefault()
         
-        const formData = new FormData()
-        formData.append('image', document.getElementById('imageInput').files[0])
-        formData.append('text', document.getElementById('secretText').value)
-        formData.append('password', document.getElementById('encryptPassword').value)
-        formData.append('enableTimer', document.getElementById('enableTimer').checked)
-        formData.append('minutes', document.getElementById('minutes').value)
-        formData.append('hours', document.getElementById('hours').value)
-        formData.append('days', document.getElementById('days').value)
-        formData.append('enableLocation', document.getElementById('enableLocation').checked)
-
-        // Get location if enabled
-        if (document.getElementById('enableLocation').checked) {
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject)
-                })
-                formData.append('lat', position.coords.latitude)
-                formData.append('lng', position.coords.longitude)
-            } catch (error) {
-                alert('Error getting location: ' + error.message)
-                return
-            }
-        }
-
         const resultDiv = document.getElementById('hideResult')
-        resultDiv.innerHTML = `
-            <div class="alert alert-info">
-                <div class="d-flex align-items-center">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                    <span>Processing your image...</span>
-                </div>
-            </div>
-        `
-
+        resultDiv.innerHTML = loadingIndicator('Processing your image...')
+        
         try {
+            const formData = new FormData(this)
+            
+            // Get location if enabled
+            if (document.getElementById('enableLocation').checked) {
+                try {
+                    const position = await getCurrentPosition()
+                    formData.append('lat', position.coords.latitude)
+                    formData.append('lng', position.coords.longitude)
+                } catch (error) {
+                    showAlert('error', `Location error: ${error.message}`, resultDiv)
+                    return
+                }
+            }
+            
             const response = await fetch('/api/hide', {
                 method: 'POST',
                 body: formData
@@ -93,27 +76,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="mt-3">
                             <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle"></i> <strong>Important:</strong> Save this password securely as it's required to extract the text later.
+                                <i class="bi bi-exclamation-triangle"></i> 
+                                <strong>Important:</strong> Save this password securely as it's required to extract the text.
                             </div>
                         </div>
                     </div>
                 `
             } else {
                 const error = await response.json()
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                        <p>${error.error || 'An unknown error occurred'}</p>
-                    </div>
-                `
+                showAlert('error', error.error || 'An unknown error occurred', resultDiv)
             }
         } catch (error) {
-            resultDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    <h5><i class="bi bi-exclamation-triangle"></i> Network Error</h5>
-                    <p>${error.message}</p>
-                </div>
-            `
+            showAlert('error', error.message || 'Network error occurred', resultDiv)
         }
     })
 
@@ -121,22 +95,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('extractForm').addEventListener('submit', async function(e) {
         e.preventDefault()
         
-        const formData = new FormData()
-        formData.append('image', document.getElementById('hiddenImage').files[0])
-        formData.append('password', document.getElementById('decryptPassword').value)
-
         const resultDiv = document.getElementById('extractResult')
-        resultDiv.innerHTML = `
-            <div class="alert alert-info">
-                <div class="d-flex align-items-center">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                    <span>Extracting text from image...</span>
-                </div>
-            </div>
-        `
-
+        resultDiv.innerHTML = loadingIndicator('Extracting text from image...')
+        
         try {
-            // First request to check if location is required
+            const formData = new FormData(this)
+            const imageFile = document.getElementById('hiddenImage').files[0]
+            
+            if (!imageFile) {
+                showAlert('error', 'Please select an image file', resultDiv)
+                return
+            }
+            
+            // First check if location is needed
             const checkResponse = await fetch('/api/extract', {
                 method: 'POST',
                 body: formData
@@ -145,70 +116,136 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkResult = await checkResponse.json()
             
             if (checkResult.requiresLocation) {
-                // Get user's current location
-                const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject)
-                })
-                
-                formData.append('userLat', position.coords.latitude)
-                formData.append('userLng', position.coords.longitude)
-                
-                // Second request with location data
-                const finalResponse = await fetch('/api/extract', {
-                    method: 'POST',
-                    body: formData
-                })
-                
-                const finalResult = await finalResponse.json()
-                displayResult(finalResult, resultDiv)
+                try {
+                    const position = await getCurrentPosition()
+                    formData.append('userLat', position.coords.latitude)
+                    formData.append('userLng', position.coords.longitude)
+                    
+                    // Retry with location
+                    const finalResponse = await fetch('/api/extract', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    
+                    const finalResult = await finalResponse.json()
+                    displayResult(finalResult, resultDiv)
+                } catch (error) {
+                    showAlert('error', `Location error: ${error.message}`, resultDiv)
+                }
             } else {
                 displayResult(checkResult, resultDiv)
             }
         } catch (error) {
-            resultDiv.innerHTML = `
-                <div class="alert alert-danger">
-                    <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                    <p>${error.message || 'Failed to extract text'}</p>
-                </div>
-            `
+            showAlert('error', error.message || 'Network error occurred', resultDiv)
         }
     })
-
-    function displayResult(result, element) {
-        if (result.success) {
-            element.innerHTML = `
-                <div class="alert alert-success">
-                    <h5><i class="bi bi-check-circle"></i> Extracted Text</h5>
-                    <div class="bg-white bg-dark-mode-dark p-3 rounded mt-2">
-                        <pre class="mb-0">${result.text}</pre>
-                    </div>
-                    <button class="btn btn-outline-primary mt-3" onclick="navigator.clipboard.writeText('${result.text.replace(/'/g, "\\'")}')">
-                        <i class="bi bi-clipboard"></i> Copy to Clipboard
-                    </button>
-                </div>
-            `
-        } else {
-            element.innerHTML = `
-                <div class="alert alert-danger">
-                    <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                    <p>${result.error || 'Failed to extract text'}</p>
-                </div>
-            `
-        }
-    }
 
     // Input validation
     document.getElementById('imageInput').addEventListener('change', function() {
-        if (this.files[0] && this.files[0].size > 8 * 1024 * 1024) {
-            alert('Image size exceeds 8MB limit')
-            this.value = ''
-        }
+        validateFileSize(this, 8)
     })
 
     document.getElementById('hiddenImage').addEventListener('change', function() {
-        if (this.files[0] && this.files[0].size > 8 * 1024 * 1024) {
-            alert('Image size exceeds 8MB limit')
-            this.value = ''
-        }
+        validateFileSize(this, 8)
     })
 })
+
+// Helper functions
+function loadingIndicator(message) {
+    return `
+        <div class="alert alert-info">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                <span>${message}</span>
+            </div>
+        </div>
+    `
+}
+
+function showAlert(type, message, element) {
+    const icon = type === 'error' ? 'exclamation-triangle' : 'check-circle'
+    element.innerHTML = `
+        <div class="alert alert-${type}">
+            <h5><i class="bi bi-${icon}"></i> ${type.charAt(0).toUpperCase() + type.slice(1)}</h5>
+            <p>${message}</p>
+        </div>
+    `
+}
+
+function displayResult(result, element) {
+    if (result.success) {
+        const escapedText = escapeHtml(result.text)
+        element.innerHTML = `
+            <div class="alert alert-success">
+                <h5><i class="bi bi-check-circle"></i> Extracted Text</h5>
+                <div class="bg-white bg-dark-mode-dark p-3 rounded mt-2">
+                    <pre class="mb-0">${escapedText}</pre>
+                </div>
+                <button class="btn btn-outline-primary mt-3" onclick="copyToClipboard('${escapeSingleQuotes(result.text)}')">
+                    <i class="bi bi-clipboard"></i> Copy to Clipboard
+                </button>
+            </div>
+        `
+    } else {
+        showAlert('error', result.error || 'Failed to extract text', element)
+    }
+}
+
+function validateFileSize(input, maxSizeMB) {
+    if (input.files[0] && input.files[0].size > maxSizeMB * 1024 * 1024) {
+        showAlert('error', `Image size exceeds ${maxSizeMB}MB limit`, input.parentNode)
+        input.value = ''
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+}
+
+function escapeSingleQuotes(text) {
+    return text.replace(/'/g, "\\'")
+}
+
+function getCurrentPosition() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation not supported'))
+            return
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+            position => resolve(position),
+            error => {
+                let message
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = 'Permission denied. Please enable location access.'
+                        break
+                    case error.POSITION_UNAVAILABLE:
+                        message = 'Location information unavailable.'
+                        break
+                    case error.TIMEOUT:
+                        message = 'Location request timed out.'
+                        break
+                    default:
+                        message = 'Unknown error getting location.'
+                }
+                reject(new Error(message))
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        )
+    })
+}
+
+// Global function for copy button
+window.copyToClipboard = function(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        const alert = document.createElement('div')
+        alert.className = 'alert alert-info position-fixed top-0 end-0 m-3'
+        alert.innerHTML = '<i class="bi bi-check-circle"></i> Copied to clipboard!'
+        document.body.appendChild(alert)
+        setTimeout(() => alert.remove(), 2000)
+    })
+}
