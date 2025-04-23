@@ -136,42 +136,66 @@ document.addEventListener('DOMContentLoaded', function() {
         `
 
         try {
-            const response = await fetch('/api/extract', {
+            // First request to check if location is required
+            const checkResponse = await fetch('/api/extract', {
                 method: 'POST',
                 body: formData
             })
-
-            const result = await response.json()
-
-            if (response.ok) {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        <h5><i class="bi bi-check-circle"></i> Extracted Text</h5>
-                        <div class="bg-white bg-dark-mode-dark p-3 rounded mt-2">
-                            <pre class="mb-0">${result.text}</pre>
-                        </div>
-                        <button class="btn btn-outline-primary mt-3" onclick="navigator.clipboard.writeText('${result.text.replace(/'/g, "\\'")}')">
-                            <i class="bi bi-clipboard"></i> Copy to Clipboard
-                        </button>
-                    </div>
-                `
+            
+            const checkResult = await checkResponse.json()
+            
+            if (checkResult.requiresLocation) {
+                // Get user's current location
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject)
+                })
+                
+                formData.append('userLat', position.coords.latitude)
+                formData.append('userLng', position.coords.longitude)
+                
+                // Second request with location data
+                const finalResponse = await fetch('/api/extract', {
+                    method: 'POST',
+                    body: formData
+                })
+                
+                const finalResult = await finalResponse.json()
+                displayResult(finalResult, resultDiv)
             } else {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                        <p>${result.error || 'Failed to extract text'}</p>
-                    </div>
-                `
+                displayResult(checkResult, resultDiv)
             }
         } catch (error) {
             resultDiv.innerHTML = `
                 <div class="alert alert-danger">
-                    <h5><i class="bi bi-exclamation-triangle"></i> Network Error</h5>
-                    <p>${error.message}</p>
+                    <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                    <p>${error.message || 'Failed to extract text'}</p>
                 </div>
             `
         }
     })
+
+    function displayResult(result, element) {
+        if (result.success) {
+            element.innerHTML = `
+                <div class="alert alert-success">
+                    <h5><i class="bi bi-check-circle"></i> Extracted Text</h5>
+                    <div class="bg-white bg-dark-mode-dark p-3 rounded mt-2">
+                        <pre class="mb-0">${result.text}</pre>
+                    </div>
+                    <button class="btn btn-outline-primary mt-3" onclick="navigator.clipboard.writeText('${result.text.replace(/'/g, "\\'")}')">
+                        <i class="bi bi-clipboard"></i> Copy to Clipboard
+                    </button>
+                </div>
+            `
+        } else {
+            element.innerHTML = `
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
+                    <p>${result.error || 'Failed to extract text'}</p>
+                </div>
+            `
+        }
+    }
 
     // Input validation
     document.getElementById('imageInput').addEventListener('change', function() {
