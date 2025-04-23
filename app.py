@@ -7,6 +7,7 @@ from Crypto.Util.Padding import pad, unpad
 import json
 import os
 from datetime import datetime, timedelta
+from math import radians, sin, cos, sqrt, atan2
 
 app = Flask(__name__)
 
@@ -19,6 +20,7 @@ KEY_SIZE = 32  # 256-bit key
 BLOCK_SIZE = 16  # AES block size
 
 def encrypt_text(text, password):
+    """Encrypt text using AES-256-CBC"""
     salt = os.urandom(16)
     key = pad(password.encode(), KEY_SIZE)[:KEY_SIZE]
     cipher = AES.new(key, AES.MODE_CBC, salt)
@@ -26,6 +28,7 @@ def encrypt_text(text, password):
     return base64.b64encode(salt + ciphertext).decode()
 
 def decrypt_text(encrypted_text, password):
+    """Decrypt text using AES-256-CBC"""
     data = base64.b64decode(encrypted_text)
     salt, ciphertext = data[:16], data[16:]
     key = pad(password.encode(), KEY_SIZE)[:KEY_SIZE]
@@ -36,12 +39,26 @@ def decrypt_text(encrypted_text, password):
     except:
         return None
 
+def calculate_distance(lat1, lon1, lat2, lon2):
+    """Calculate distance between two coordinates using Haversine formula"""
+    R = 6371  # Earth radius in km
+    
+    lat1, lon1 = radians(lat1), radians(lon1)
+    lat2, lon2 = radians(lat2), radians(lon2)
+    
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    return R * c
+
 def hide_data_in_image(image_path, text, password, expiry=None, location=None):
+    """Hide encrypted data in image using LSB steganography"""
     img = Image.open(image_path)
     if img.mode != 'RGB':
         img = img.convert('RGB')
     
-    # Prepare data payload
     payload = {
         'text': encrypt_text(text, password),
         'expiry': expiry.isoformat() if expiry else None,
@@ -49,11 +66,9 @@ def hide_data_in_image(image_path, text, password, expiry=None, location=None):
     }
     data_str = json.dumps(payload)
     
-    # Convert to binary
     binary_data = ''.join(format(ord(c), '08b') for c in data_str)
     binary_data += '00000000'  # End marker
     
-    # Hide data in LSB
     pixels = img.load()
     width, height = img.size
     data_index = 0
@@ -77,18 +92,17 @@ def hide_data_in_image(image_path, text, password, expiry=None, location=None):
             
             pixels[x, y] = (r, g, b)
     
-    # Save to bytes
     img_byte_arr = io.BytesIO()
     img.save(img_byte_arr, format='PNG', quality=95)
     img_byte_arr.seek(0)
     return img_byte_arr
 
 def extract_data_from_image(image_path, password):
+    """Extract hidden data from image"""
     img = Image.open(image_path)
     if img.mode != 'RGB':
         img = img.convert('RGB')
     
-    # Extract binary data
     pixels = img.load()
     width, height = img.size
     binary_data = ''
@@ -100,15 +114,13 @@ def extract_data_from_image(image_path, password):
             binary_data += str(g & 1)
             binary_data += str(b & 1)
     
-    # Find end marker
     end_index = binary_data.find('00000000')
     if end_index == -1:
         return {'error': 'No hidden data found'}
     
     binary_data = binary_data[:end_index]
-    
-    # Convert to string
     data_str = ''
+    
     for i in range(0, len(binary_data), 8):
         byte = binary_data[i:i+8]
         data_str += chr(int(byte, 2))
@@ -120,19 +132,17 @@ def extract_data_from_image(image_path, password):
         if payload.get('expiry'):
             expiry = datetime.fromisoformat(payload['expiry'])
             if datetime.now() > expiry:
-                return {'error': 'Time restriction expired'}
-        
-        # Check location
-        if payload.get('location'):
-            # In a real app, compare with current location
-            pass
+                return {'error': 'This message has expired'}
         
         # Decrypt text
         decrypted = decrypt_text(payload['text'], password)
         if not decrypted:
             return {'error': 'Invalid password'}
         
-        return {'text': decrypted}
+        return {
+            'text': decrypted,
+            'location': payload.get('location')
+        }
     
     except Exception as e:
         return {'error': f'Data extraction failed: {str(e)}'}
@@ -154,7 +164,7 @@ def api_hide():
         if not text or not password:
             return jsonify({'success': False, 'error': 'Text and password are required'}), 400
         
-        # Process restrictions
+        # Process time restriction
         expiry = None
         if request.form.get('enableTimer') == 'true':
             expiry = datetime.now() + timedelta(
@@ -163,19 +173,18 @@ def api_hide():
                 days=int(request.form.get('days', 0))
             )
         
+        # Process location restriction
         location = None
         if request.form.get('enableLocation') == 'true':
             location = {
-                'lat': request.form.get('lat'),
-                'lng': request.form.get('lng'),
-                'radius': 1  # 1km
+                'lat': float(request.form.get('lat')),
+                'lng': float(request.form.get('lng')),
+                'radius': 1  # 1km radius
             }
         
-        # Save temp file
+        # Process image
         temp_path = 'temp_' + image.filename
         image.save(temp_path)
-        
-        # Process image
         result = hide_data_in_image(temp_path, text, password, expiry, location)
         os.remove(temp_path)
         
@@ -205,12 +214,38 @@ def api_extract():
         temp_path = 'temp_' + image.filename
         image.save(temp_path)
         
-        # Process image
+        # Extract data
         result = extract_data_from_image(temp_path, password)
         os.remove(temp_path)
         
         if 'error' in result:
             return jsonify({'success': False, 'error': result['error']}), 400
+        
+        # Check location restriction
+        if result.get('location'):
+            user_lat = request.form.get('userLat')
+            user_lng = request.form.get('userLng')
+            
+            if not user_lat or not user_lng:
+                return jsonify({
+                    'success': False,
+                    'requiresLocation': True,
+                    'error': 'Location access required to view this content'
+                }), 400
+            
+            # Verify location
+            distance = calculate_distance(
+                result['location']['lat'],
+                result['location']['lng'],
+                float(user_lat),
+                float(user_lng)
+            )
+            
+            if distance > result['location']['radius']:
+                return jsonify({
+                    'success': False,
+                    'error': f'You must be within {result["location"]["radius"]}km of the original location to view this content'
+                }), 403
         
         return jsonify({'success': True, 'text': result['text']})
     
