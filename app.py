@@ -223,8 +223,8 @@ def api_extract():
         
         # Check location restriction
         if result.get('location'):
-            user_lat = request.form.get('userLat')
-            user_lng = request.form.get('userLng')
+            user_lat = float(request.form.get('userLat', 0))
+            user_lng = float(request.form.get('userLng', 0))
             
             if not user_lat or not user_lng:
                 return jsonify({
