@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+    tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
     // Timer toggle
     document.getElementById('enableTimer').addEventListener('change', function() {
@@ -45,16 +43,26 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('days', document.getElementById('days').value)
         formData.append('enableLocation', document.getElementById('enableLocation').checked)
 
-        // Get location if enabled
         if (document.getElementById('enableLocation').checked) {
             try {
                 const position = await new Promise((resolve, reject) => {
-                    navigator.geolocation.getCurrentPosition(resolve, reject)
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000
+                    })
                 })
                 formData.append('lat', position.coords.latitude)
                 formData.append('lng', position.coords.longitude)
             } catch (error) {
-                alert('Error getting location: ' + error.message)
+                document.getElementById('hideResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5><i class="bi bi-exclamation-triangle"></i> Location Error</h5>
+                        <p>${error.message}</p>
+                        <button class="btn btn-sm btn-outline-secondary mt-2" onclick="document.getElementById('enableLocation').checked = false; this.closest('form').requestSubmit()">
+                            <i class="bi bi-arrow-clockwise"></i> Continue Without Location
+                        </button>
+                    </div>
+                `
                 return
             }
         }
@@ -62,10 +70,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const resultDiv = document.getElementById('hideResult')
         resultDiv.innerHTML = `
             <div class="alert alert-info">
-                <div class="d-flex align-items-center">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                    <span>Processing your image...</span>
-                </div>
+                <div class="spinner-border spinner-border-sm me-2"></div>
+                Processing your image...
             </div>
         `
 
@@ -78,112 +84,158 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const blob = await response.blob()
                 const url = URL.createObjectURL(blob)
-                
                 resultDiv.innerHTML = `
                     <div class="alert alert-success">
                         <h5><i class="bi bi-check-circle"></i> Success!</h5>
                         <p>Your text has been securely hidden in the image.</p>
-                        <div class="text-center my-3">
-                            <img src="${url}" class="img-fluid rounded border" style="max-height: 200px;">
-                        </div>
-                        <div class="d-grid gap-2">
-                            <a href="${url}" download="secure_image.png" class="btn btn-success">
-                                <i class="bi bi-download"></i> Download Image
-                            </a>
-                        </div>
-                        <div class="mt-3">
-                            <div class="alert alert-warning">
-                                <i class="bi bi-exclamation-triangle"></i> <strong>Important:</strong> Save this password securely as it's required to extract the text later.
-                            </div>
-                        </div>
+                        <img src="${url}" class="img-fluid my-2" style="max-height:200px">
+                        <a href="${url}" download="secure_image.png" class="btn btn-success w-100">
+                            <i class="bi bi-download"></i> Download Secure Image
+                        </a>
                     </div>
                 `
             } else {
                 const error = await response.json()
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                        <p>${error.error || 'An unknown error occurred'}</p>
-                    </div>
-                `
+                throw new Error(error.error || 'Failed to hide text in image')
             }
         } catch (error) {
             resultDiv.innerHTML = `
                 <div class="alert alert-danger">
-                    <h5><i class="bi bi-exclamation-triangle"></i> Network Error</h5>
+                    <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
                     <p>${error.message}</p>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="this.closest('form').requestSubmit()">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </button>
                 </div>
             `
+            console.error('Hiding error:', error)
         }
     })
 
-    // Extract form submission
+    // Extract form submission - Fixed version
     document.getElementById('extractForm').addEventListener('submit', async function(e) {
         e.preventDefault()
+        console.log('Starting extraction process...')
         
-        const formData = new FormData()
-        formData.append('image', document.getElementById('hiddenImage').files[0])
-        formData.append('password', document.getElementById('decryptPassword').value)
-
         const resultDiv = document.getElementById('extractResult')
         resultDiv.innerHTML = `
             <div class="alert alert-info">
-                <div class="d-flex align-items-center">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                    <span>Extracting text from image...</span>
-                </div>
+                <div class="spinner-border spinner-border-sm me-2"></div>
+                Preparing extraction...
             </div>
         `
 
         try {
+            // 1. Validate inputs
+            const imageFile = document.getElementById('hiddenImage').files[0]
+            const password = document.getElementById('decryptPassword').value
+            
+            if (!imageFile) throw new Error('Please select an image file')
+            if (!password) throw new Error('Please enter the password')
+
+            // 2. Prepare FormData
+            const formData = new FormData()
+            formData.append('image', imageFile)
+            formData.append('password', password)
+            console.log('FormData prepared with image size:', imageFile.size)
+
+            // 3. Get location (optional)
+            let position;
+            try {
+                position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000
+                    })
+                })
+                formData.append('current_lat', position.coords.latitude)
+                formData.append('current_lng', position.coords.longitude)
+                console.log('Location added:', position.coords)
+            } catch (geoError) {
+                console.log('Proceeding without location:', geoError.message)
+            }
+
+            // 4. Show extracting status
+            resultDiv.innerHTML = `
+                <div class="alert alert-info">
+                    <div class="spinner-border spinner-border-sm me-2"></div>
+                    Extracting text from image...
+                </div>
+            `
+
+            // 5. Send to server with timeout
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => {
+                if (!controller.signal.aborted) {
+                    controller.abort()
+                    console.log('Request timed out after 15s')
+                }
+            }, 15000)
+
             const response = await fetch('/api/extract', {
                 method: 'POST',
-                body: formData
-            })
+                body: formData,
+                signal: controller.signal
+            }).finally(() => clearTimeout(timeoutId))
+
+            console.log('Server response received')
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Server error' }))
+                throw new Error(error.error || `Server returned ${response.status}`)
+            }
 
             const result = await response.json()
+            console.log('Extraction result:', result)
 
-            if (response.ok) {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        <h5><i class="bi bi-check-circle"></i> Extracted Text</h5>
-                        <div class="bg-white bg-dark-mode-dark p-3 rounded mt-2">
-                            <pre class="mb-0">${result.text}</pre>
-                        </div>
-                        <button class="btn btn-outline-primary mt-3" onclick="navigator.clipboard.writeText('${result.text.replace(/'/g, "\\'")}')">
-                            <i class="bi bi-clipboard"></i> Copy to Clipboard
-                        </button>
+            // 6. Display result
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h5><i class="bi bi-check-circle"></i> Extraction Successful!</h5>
+                    <div class="bg-light p-3 mb-2 rounded">
+                        <pre style="white-space: pre-wrap;">${result.text}</pre>
                     </div>
-                `
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <h5><i class="bi bi-exclamation-triangle"></i> Error</h5>
-                        <p>${result.error || 'Failed to extract text'}</p>
-                    </div>
-                `
-            }
+                    <button class="btn btn-outline-primary w-100 mt-2" onclick="navigator.clipboard.writeText('${result.text.replace(/'/g, "\\'")}')">
+                        <i class="bi bi-clipboard"></i> Copy Text
+                    </button>
+                </div>
+            `
+
         } catch (error) {
+            console.error('Extraction failed:', error)
+            let errorMessage = error.message
+            
+            if (error.name === 'AbortError') {
+                errorMessage = 'Request timed out (15s) - Try with a smaller image'
+            } else if (error.message.includes('password')) {
+                errorMessage = 'Incorrect password'
+            } else if (error.message.includes('No hidden data')) {
+                errorMessage = 'No hidden text found in this image'
+            }
+
             resultDiv.innerHTML = `
                 <div class="alert alert-danger">
-                    <h5><i class="bi bi-exclamation-triangle"></i> Network Error</h5>
+                    <h5><i class="bi bi-exclamation-triangle"></i> ${errorMessage}</h5>
                     <p>${error.message}</p>
+                    <button class="btn btn-primary w-100 mt-2" onclick="this.closest('form').requestSubmit()">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </button>
                 </div>
             `
         }
     })
 
-    // Input validation
+    // File validation
     document.getElementById('imageInput').addEventListener('change', function() {
-        if (this.files[0] && this.files[0].size > 8 * 1024 * 1024) {
-            alert('Image size exceeds 8MB limit')
+        if (this.files[0]?.size > 8 * 1024 * 1024) {
+            alert('Maximum file size is 8MB. Please choose a smaller image.')
             this.value = ''
         }
     })
 
     document.getElementById('hiddenImage').addEventListener('change', function() {
-        if (this.files[0] && this.files[0].size > 8 * 1024 * 1024) {
-            alert('Image size exceeds 8MB limit')
+        if (this.files[0]?.size > 8 * 1024 * 1024) {
+            alert('Maximum file size is 8MB. Please choose a smaller image.')
             this.value = ''
         }
     })
