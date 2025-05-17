@@ -38,7 +38,9 @@
                             </div>
                             <div class="mb-3">
                                 <label for="encryptPassword" class="form-label">Encryption Password</label>
-                                <input type="password" id="encryptPassword" class="form-control" placeholder="Enter a strong password" required>
+                                <input type="password" id="encryptPassword" class="form-control" 
+                                       placeholder="Enter a strong password" required autocomplete="new-password">
+                                <div class="form-text">You'll need this password to extract the text later</div>
                             </div>
                             <div class="mb-3">
                                 <label for="imageInput" class="form-label">Cover Image</label>
@@ -96,10 +98,12 @@
                             <div class="mb-3">
                                 <label for="hiddenImage" class="form-label">Image with Hidden Text</label>
                                 <input type="file" id="hiddenImage" class="form-control" accept="image/png, image/jpeg" required>
+                                <div class="form-text">Select the image containing hidden text</div>
                             </div>
                             <div class="mb-3">
                                 <label for="decryptPassword" class="form-label">Decryption Password</label>
-                                <input type="password" id="decryptPassword" class="form-control" placeholder="Enter the password used for encryption" required>
+                                <input type="password" id="decryptPassword" class="form-control" 
+                                       placeholder="Enter the password used for encryption" required autocomplete="current-password">
                             </div>
                             <button type="submit" class="btn btn-success w-100 py-2">
                                 <i class="bi bi-unlock"></i> Extract Text
@@ -110,7 +114,7 @@
                 </div>
             </div>
             <div class="card-footer text-muted text-center">
-                <small>Secure Text Hider v1.0 | All data processed locally</small>
+                <small>Secure Text Hider v1.0 | All data processed securely</small>
             </div>
         </div>
     </div>
