@@ -10,77 +10,93 @@ from datetime import datetime, timedelta
 import math
 import time
 
+
 app = Flask(__name__)
 
-# Configuration
+
+#سيتينق الفايل ابلود
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
-app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8MB max upload
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
+#ماكسيمام 8 ميجا عشان ما يعلق
 
-# Encryption Settings
-KEY_SIZE = 32  # 256-bit key
-BLOCK_SIZE = 16  # AES block size
 
-def encrypt_text(text, password):
+#خاصية التشفير aes
+#256 bit
+KEY_SIZE = 32
+#سايز الكي
+BLOCK_SIZE = 16  
+
+
+
+
+def encrypttext(text, password):
     salt = os.urandom(16)
     key = pad(password.encode(), KEY_SIZE)[:KEY_SIZE]
     cipher = AES.new(key, AES.MODE_CBC, salt)
     ciphertext = cipher.encrypt(pad(text.encode(), BLOCK_SIZE))
     return base64.b64encode(salt + ciphertext).decode()
 
-def decrypt_text(encrypted_text, password):
+
+
+def decrypttext(encrypted_text, password):
     try:
         data = base64.b64decode(encrypted_text)
         salt, ciphertext = data[:16], data[16:]
         key = pad(password.encode(), KEY_SIZE)[:KEY_SIZE]
         cipher = AES.new(key, AES.MODE_CBC, salt)
-        decrypted = unpad(cipher.decrypt(ciphertext), BLOCK_SIZE).decode()
-        return decrypted
+        clear_text = unpad(cipher.decrypt(ciphertext), BLOCK_SIZE).decode()
+        return clear_text
     except Exception as e:
         print(f"Decryption error: {str(e)}")
         return None
 
-def calculate_distance(lat1, lon1, lat2, lon2):
-    # Haversine formula implementation
+
+
+
+def geo_distance_km(lat1, lon1, lat2, lon2):
+    #التشييك على المسافه بين مكان التشفير وفك التشفير
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    d_lat = lat2 - lat1
+    d_lon = lon2 - lon1
+    a = math.sin(d_lat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(d_lon/2)**2
     c = 2 * math.asin(math.sqrt(a))
-    r = 6371  # Earth radius in km
+    #نصف القطر
+    r = 6371  
     return c * r
 
-def hide_data_in_image(image_path, text, password, expiry=None, location=None):
+
+
+def hide_text_image(image_path, text, password, expiry=None, location=None):
     try:
         img = Image.open(image_path)
         if img.mode != 'RGB':
             img = img.convert('RGB')
         
         payload = {
-            'text': encrypt_text(text, password),
+            'text': encrypttext(text, password),
             'expiry': expiry.isoformat() if expiry else None,
             'location': location
         }
-        binary_data = ''.join(format(ord(c), '08b') for c in json.dumps(payload)) + '00000000'
-        
-        pixels = img.load()
+        binary_payload = ''.join(format(ord(c), '08b') for c in json.dumps(payload)) + '00000000'
+        pix = img.load()
         width, height = img.size
-        data_index = 0
+        idx = 0
         
         for y in range(height):
             for x in range(width):
-                if data_index >= len(binary_data):
+                if idx >= len(binary_payload):
                     break
-                r, g, b = pixels[x, y]
-                if data_index < len(binary_data):
-                    r = (r & 0xFE) | int(binary_data[data_index])
-                    data_index += 1
-                if data_index < len(binary_data):
-                    g = (g & 0xFE) | int(binary_data[data_index])
-                    data_index += 1
-                if data_index < len(binary_data):
-                    b = (b & 0xFE) | int(binary_data[data_index])
-                    data_index += 1
-                pixels[x, y] = (r, g, b)
+                r, g, b = pix[x, y]
+                if idx < len(binary_payload):
+                    r = (r & 0xFE) | int(binary_payload[idx])
+                    idx += 1
+                if idx < len(binary_payload):
+                    g = (g & 0xFE) | int(binary_payload[idx])
+                    idx += 1
+                if idx < len(binary_payload):
+                    b = (b & 0xFE) | int(binary_payload[idx])
+                    idx += 1
+                pix[x, y] = (r, g, b)
         
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
@@ -90,7 +106,10 @@ def hide_data_in_image(image_path, text, password, expiry=None, location=None):
         print(f"Error hiding data: {str(e)}")
         raise
 
-def extract_data_from_image(image_path, password):
+
+
+
+def extract_hidden_image(image_path, password):
     try:
         print(f"[{datetime.now()}] Starting extraction...")
         start_time = time.time()
@@ -99,27 +118,27 @@ def extract_data_from_image(image_path, password):
         if img.mode != 'RGB':
             img = img.convert('RGB')
         
-        binary_data = ''
-        pixels = img.load()
+        binary_string = ''
+        pix = img.load()
         width, height = img.size
         
-        # Process only first 1000px for faster extraction
-        max_pixels = 1000
-        processed_pixels = 0
+        #منحدد اول الف بيكسيل عشان السرعه بالاستخراج
+        max_pix = 1000
+        processed_pix = 0
         
         for y in range(height):
             for x in range(width):
-                if processed_pixels >= max_pixels:
+                if processed_pix >= max_pix:
                     break
-                r, g, b = pixels[x, y]
-                binary_data += str(r & 1) + str(g & 1) + str(b & 1)
-                processed_pixels += 1
+                r, g, b = pix[x, y]
+                binary_string += str(r & 1) + str(g & 1) + str(b & 1)
+                processed_pix += 1
         
-        end_index = binary_data.find('00000000')
-        if end_index == -1:
+        endmarker = binary_string.find('00000000')
+        if endmarker == -1:
             return {'error': 'No hidden data found in image'}
         
-        data_str = ''.join(chr(int(binary_data[i:i+8], 2)) for i in range(0, end_index, 8))
+        data_str = ''.join(chr(int(binary_string[i:i+8], 2)) for i in range(0, endmarker, 8))
         print(f"[{datetime.now()}] Data extracted in {time.time()-start_time:.2f}s")
         
         try:
@@ -140,13 +159,13 @@ def extract_data_from_image(image_path, password):
                     stored_lng = float(payload['location']['lng'])
                     radius = float(payload['location'].get('radius', 1.0))
                     
-                    distance = calculate_distance(current_lat, current_lng, stored_lat, stored_lng)
+                    distance = geo_distance_km(current_lat, current_lng, stored_lat, stored_lng)
                     if distance > radius:
                         return {'error': f'Must be within {radius}km (currently {distance:.2f}km away)'}
                 except Exception as e:
                     return {'error': f'Location error: {str(e)}'}
             
-            decrypted = decrypt_text(payload['text'], password)
+            decrypted = decrypttext(payload['text'], password)
             if not decrypted:
                 return {'error': 'Incorrect password'}
             
@@ -161,6 +180,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/api/hide', methods=['POST'])
+
 def api_hide():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'}), 400
@@ -192,7 +212,7 @@ def api_hide():
         
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
-        result = hide_data_in_image(temp_path, text, password, expiry, location)
+        result = hide_text_image(temp_path, text, password, expiry, location)
         os.remove(temp_path)
         
         print(f"Hiding completed in {time.time()-start_time:.2f}s")
@@ -201,6 +221,9 @@ def api_hide():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/extract', methods=['POST'])
+
+
+
 def api_extract():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'}), 400
@@ -215,7 +238,7 @@ def api_extract():
         
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
-        result = extract_data_from_image(temp_path, password)
+        result = extract_hidden_image(temp_path, password)
         os.remove(temp_path)
         
         print(f"Extraction completed in {time.time()-start_time:.2f}s")
