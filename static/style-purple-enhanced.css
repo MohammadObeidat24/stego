@@ -319,6 +319,7 @@ body:not(.dark-mode) .form-check-label {
     box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
 }
 body {
-    background: url("{{ url_for('static', filename='site-background-final.png') }}") no-repeat center center fixed;
+    background: url("site-background-final.png") no-repeat center center fixed;
     background-size: cover;
 }
+
