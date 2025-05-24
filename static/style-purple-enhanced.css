@@ -345,3 +345,8 @@ body {
 #introScreen img.splash-animate {
   animation: zoomInSmooth 1s ease forwards;
 }
+#splashLogo {
+  transform-origin: center center;
+  display: block;
+  margin: 0 auto;
+}
