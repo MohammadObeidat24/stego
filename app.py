@@ -122,18 +122,22 @@ def extract_hidden_image(image_path, password):
         pix = img.load()
         width, height = img.size
         
-        #منحدد اول الف بيكسيل عشان السرعه بالاستخراج
-        max_pix = 1000
-        processed_pix = 0
-        
+        found_terminator = False  # علم لإيقاف الحلقة عندما نجد النهاية
+
         for y in range(height):
             for x in range(width):
-                if processed_pix >= max_pix:
-                    break
                 r, g, b = pix[x, y]
-                binary_string += str(r & 1) + str(g & 1) + str(b & 1)
-                processed_pix += 1
-        
+                binary_string += str(r & 1)
+                binary_string += str(g & 1)
+                binary_string += str(b & 1)
+
+                # ✅ نتأكد كل فترة صغيرة إذا ظهرت نهاية البيانات
+                if '00000000' in binary_string[-24:]:
+                    found_terminator = True
+                    break
+            if found_terminator:
+                break
+
         endmarker = binary_string.find('00000000')
         if endmarker == -1:
             return {'error': 'No hidden data found in image'}
