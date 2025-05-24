@@ -9,7 +9,6 @@ import os
 from datetime import datetime, timedelta
 import math
 import time
-from PIL import UnidentifiedImageError
 
 app = Flask(__name__)
 
@@ -114,23 +113,8 @@ def extract_hidden_image(image_path, password):
         print(f"[{datetime.now()}] Starting extraction...")
         start_time = time.time()
         
+        img = Image.open(image_path)
         
-        img = Image.open(image_path)
-
-        # ✅ تأكد أن الصورة من النوع PNG أو JPEG فقط
-        if img.format not in ['PNG', 'JPEG']:
-            return {'error': 'Only PNG and JPEG images are allowed'}
-
-        img.verify()  # يتأكد أن الصورة غير معطوبة
-        image_path.seek(0)  # يرجّع المؤشر لبداية الملف
-
-        # أعد الفتح بعد verify
-        img = Image.open(image_path)
-    except UnidentifiedImageError:
-        return {'error': 'Invalid image file'}
-    except Exception as e:
-        return {'error': f'Image validation failed: {str(e)}'}
-
         if img.mode != 'RGB':
             img = img.convert('RGB')
         
