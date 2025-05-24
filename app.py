@@ -163,7 +163,6 @@ def extract_hidden_image(image_path, password):
                     if distance > radius:
                         return {'error': f'Must be within {radius}km (You are outside the permitted location)'}
                 except Exception as e:
-                    return {'error': f'Location error: {str(e)}'}
             
             decrypted = decrypttext(payload['text'], password)
             if not decrypted:
