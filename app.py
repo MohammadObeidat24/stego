@@ -161,7 +161,7 @@ def extract_hidden_image(image_path, password):
                     
                     distance = geo_distance_km(current_lat, current_lng, stored_lat, stored_lng)
                     if distance > radius:
-                        return {'error': f'Must be within {radius}km (You are outside the permitted location)'}
+                        return {'error': f'(You are outside the permitted location)'}
                 except Exception as e:
                     return {'error': f'Location error: {str(e)}'}
                     
