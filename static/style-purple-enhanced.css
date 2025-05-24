@@ -310,3 +310,11 @@ body:not(.dark-mode) .form-check-label {
 #darkModeToggle:checked ~ .form-check-label {
     color: #e0d7f3 !important;
 }
+.form-check-input:checked {
+    background-color: var(--nahdi-primary) !important;
+    border-color: var(--nahdi-primary) !important;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
