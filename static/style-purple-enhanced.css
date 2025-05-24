@@ -1,4 +1,3 @@
-
 :root {
     --nahdi-primary: #6f42c1;
     --nahdi-secondary: #b085f5;
@@ -206,4 +205,83 @@ body {
         padding: 0.5rem 1rem;
         font-size: 0.875rem;
     }
+}
+
+
+/* Dark Mode Support */
+body.dark-mode {
+    background-color: #121212;
+    color: #f8f9fa;
+}
+
+body.dark-mode .card {
+    background-color: #1e1e1e;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .card-header {
+    background: linear-gradient(to right, #4a148c, #6f42c1);
+}
+
+body.dark-mode .card-footer {
+    background-color: #1a1a1a;
+    border-top: 1px solid #333;
+    color: #bbb;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #f8f9fa;
+}
+
+body.dark-mode .form-control::placeholder,
+body.dark-mode .form-select::placeholder {
+    color: #aaa;
+}
+
+body.dark-mode .form-text {
+    color: #aaa;
+}
+
+body.dark-mode .nav-tabs {
+    border-bottom-color: #444;
+}
+
+body.dark-mode .nav-tabs .nav-link {
+    color: #bbb;
+}
+
+body.dark-mode .nav-tabs .nav-link.active {
+    color: #b085f5;
+    border-bottom-color: #b085f5;
+}
+
+body.dark-mode .accordion-item,
+body.dark-mode .accordion-button {
+    background-color: #2d2d2d;
+    color: #f8f9fa;
+}
+
+body.dark-mode .accordion-button:not(.collapsed) {
+    background-color: #2d2d2d;
+    color: #b085f5;
+}
+
+body.dark-mode .result-box {
+    background-color: rgba(156, 39, 176, 0.2);
+    border-left-color: #ce93d8;
+}
+
+body.dark-mode .alert-success {
+    background-color: rgba(156, 39, 176, 0.2);
+    border-left: 4px solid #ba68c8;
+    color: #eee;
+}
+
+body.dark-mode .alert-danger {
+    background-color: rgba(194, 24, 91, 0.2);
+    border-left: 4px solid #f06292;
+    color: #eee;
 }
