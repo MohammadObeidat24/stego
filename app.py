@@ -188,7 +188,7 @@ def index():
 def api_hide():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'}), 400
-    
+    temp_path = None
     try:
         start_time = time.time()
         image = request.files['image']
@@ -217,12 +217,16 @@ def api_hide():
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
         result = hide_text_image(temp_path, text, password, expiry, location)
-        os.remove(temp_path)
         
         print(f"Hiding completed in {time.time()-start_time:.2f}s")
         return send_file(result, mimetype='image/png', download_name='secured_image.png')
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+    finally:
+        if temp_path and os.path.exists(temp_path):  # ✅ نحذف الملف المؤقت دائمًا
+            os.remove(temp_path)
+
 
 @app.route('/api/extract', methods=['POST'])
 
@@ -231,7 +235,8 @@ def api_hide():
 def api_extract():
     if 'image' not in request.files:
         return jsonify({'error': 'No image provided'}), 400
-    
+        
+    temp_path = None
     try:
         start_time = time.time()
         image = request.files['image']
@@ -243,7 +248,6 @@ def api_extract():
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
         result = extract_hidden_image(temp_path, password)
-        os.remove(temp_path)
         
         print(f"Extraction completed in {time.time()-start_time:.2f}s")
         if 'error' in result:
@@ -252,6 +256,9 @@ def api_extract():
         return jsonify({'text': result['text']})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        if temp_path and os.path.exists(temp_path):  # ✅ الحذف مضمون
+            os.remove(temp_path)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
