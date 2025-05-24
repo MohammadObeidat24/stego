@@ -55,13 +55,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('lng', position.coords.longitude)
             } catch (error) {
                 document.getElementById('hideResult').innerHTML = `
-                    <div class="alert alert-danger">
-                        <h5><i class="bi bi-exclamation-triangle"></i> Location Error</h5>
-                        <p>${error.message}</p>
-                        <button class="btn btn-sm btn-outline-secondary mt-2" onclick="document.getElementById('enableLocation').checked = false; this.closest('form').requestSubmit()">
-                            <i class="bi bi-arrow-clockwise"></i> Continue Without Location
-                        </button>
-                    </div>
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle"></i> ${errorMessage}</h5>
+                    <button class="btn btn-primary w-100 mt-2" onclick="this.closest('form').requestSubmit()">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </button>
+                </div>
                 `
                 return
             }
