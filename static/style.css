@@ -1,10 +1,10 @@
 :root {
-    --nahdi-primary: #0056b3;
-    --nahdi-secondary: #ffc107;
-    --nahdi-light: #f8f9fa;
-    --nahdi-dark: #212529;
-    --nahdi-success: #28a745;
-    --nahdi-danger: #dc3545;
+    --nahdi-primary: #6f42c1;
+    --nahdi-secondary: #b085f5;
+    --nahdi-light: #f3e5f5;
+    --nahdi-dark: #4a148c;
+    --nahdi-success: #9c27b0;
+    --nahdi-danger: #c2185b;
 }
 
 body {
