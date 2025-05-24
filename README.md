@@ -4,10 +4,10 @@ A web-based application for securely hiding confidential text inside images usin
 Includes optional geofencing and time-based access restrictions.
 
 ## Features
-- 🛡️ AES Encryption
-- 🖼️ Image Steganography
-- ⏰ Time Restriction
-- 📍 Location Restriction
+- AES Encryption
+- Image Steganography
+- Time Restriction
+- Location Restriction
 
 ## Tech Stack
 - Python (Flask)
