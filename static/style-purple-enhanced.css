@@ -285,3 +285,17 @@ body.dark-mode .alert-danger {
     border-left: 4px solid #f06292;
     color: #eee;
 }
+/* إصلاح لون العناوين (Labels) */
+body.dark-mode .form-label {
+    color: #e0d7f3; /* أرجواني فاتح وواضح */
+}
+
+/* إصلاح لون النصوص الإرشادية (form-text) */
+body.dark-mode .form-text {
+    color: #cfcfcf; /* رمادي فاتح واضح */
+}
+
+/* إصلاح لون زر الوضع الداكن */
+body.dark-mode .form-check-label {
+    color: #ddd; /* أبيض باهت مريح */
+}
