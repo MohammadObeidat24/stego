@@ -165,7 +165,7 @@ def extract_hidden_image(image_path, password):
                 except Exception as e:
                     return {'error': f'Location error: {str(e)}'}
                     
-                    decrypted = decrypttext(payload['text'], password)
+            decrypted = decrypttext(payload['text'], password)
             if not decrypted:
                 return {'error': 'Incorrect password'}
             
