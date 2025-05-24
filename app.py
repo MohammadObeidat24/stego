@@ -1,3 +1,4 @@
+from PIL import UnidentifiedImageError
 from flask import Flask, render_template, request, jsonify, send_file
 from PIL import Image
 import io
@@ -216,6 +217,11 @@ def api_hide():
         
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
+        try:
+            Image.open(temp_path).verify()
+        except UnidentifiedImageError:
+            return jsonify({'error': 'Uploaded file is not a valid image'}), 400
+
         result = hide_text_image(temp_path, text, password, expiry, location)
         
         print(f"Hiding completed in {time.time()-start_time:.2f}s")
@@ -247,6 +253,11 @@ def api_extract():
         
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
+        try:
+            Image.open(temp_path).verify()
+        except UnidentifiedImageError:
+            return jsonify({'error': 'Uploaded file is not a valid image'}), 400
+        
         result = extract_hidden_image(temp_path, password)
         
         print(f"Extraction completed in {time.time()-start_time:.2f}s")
