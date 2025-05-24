@@ -323,3 +323,25 @@ body {
     background-size: cover;
 }
 
+/* تحريك زوم إن */
+@keyframes zoomInSmooth {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* تحكم عام بالسبلاش */
+#introScreen {
+  transition: opacity 1s ease;
+  z-index: 9999;
+}
+
+/* الشعار */
+#introScreen img.splash-animate {
+  animation: zoomInSmooth 1s ease forwards;
+}
