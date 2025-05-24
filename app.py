@@ -114,7 +114,6 @@ def extract_hidden_image(image_path, password):
         print(f"[{datetime.now()}] Starting extraction...")
         start_time = time.time()
         
-        img = Image.open(image_path)
 # ✅ التحقق من أن الملف صورة سليمة من النوع PNG أو JPEG فقط
     try:
         img = Image.open(image)
