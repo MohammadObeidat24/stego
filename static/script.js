@@ -215,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
             resultDiv.innerHTML = `
                 <div class="alert alert-danger">
                     <h5><i class="bi bi-exclamation-triangle"></i> ${errorMessage}</h5>
-                    <p>${error.message}</p>
                     <button class="btn btn-primary w-100 mt-2" onclick="this.closest('form').requestSubmit()">
                         <i class="bi bi-arrow-clockwise"></i> Try Again
                     </button>
