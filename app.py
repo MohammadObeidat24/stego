@@ -246,6 +246,10 @@ def api_extract():
     try:
         start_time = time.time()
         image = request.files['image']
+        allowed_extensions = {'.png', '.jpg', '.jpeg'}
+        filename = image.filename.lower()
+        if not any(filename.endswith(ext) for ext in allowed_extensions):
+            return jsonify({'error': 'Only PNG and JPG images are allowed'}), 400
         password = request.form.get('password', '')
         
         if not password:
