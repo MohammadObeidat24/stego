@@ -299,3 +299,13 @@ body.dark-mode .form-text {
 body.dark-mode .form-check-label {
     color: #ddd; /* أبيض باهت مريح */
 }
+/* Dark mode label fix - positioned label in corner */
+#darkModeToggle:checked + .form-check-label,
+body.dark-mode .form-check-label {
+    color: #e0d7f3 !important;  /* أرجواني فاتح */
+}
+
+/* تحسين اللون في الوضع الفاتح أيضاً */
+body:not(.dark-mode) .form-check-label {
+    color: #4a148c;
+}
