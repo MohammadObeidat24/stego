@@ -26,7 +26,7 @@ KEY_SIZE = 32
 #سايز الكي
 BLOCK_SIZE = 16  
 
-
+#ضص
 
 
 def encrypttext(text, password):
