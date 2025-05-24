@@ -347,6 +347,8 @@ body {
 }
 #splashLogo {
   transform-origin: center center;
+  will-change: transform;
+  transform: scale(1);
   display: block;
   margin: 0 auto;
 }
