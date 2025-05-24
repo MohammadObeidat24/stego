@@ -77,7 +77,15 @@ def hide_text_image(image_path, text, password, expiry=None, location=None):
             'expiry': expiry.isoformat() if expiry else None,
             'location': location
         }
-        binary_payload = ''.join(format(ord(c), '08b') for c in json.dumps(payload)) + '00000000'
+        json_payload = json.dumps(payload)
+        binary_payload = ''.join(format(ord(c), '08b') for c in json_payload) + '00000000'
+
+        # ✅ التحقق من سعة الصورة
+        max_capacity = img.width * img.height * 3  # 3 بت في كل بكسل (R, G, B)
+        if len(binary_payload) > max_capacity:
+            raise ValueError("Image is too small to hide this message. Please use a larger image or shorter text.")
+
+        
         pix = img.load()
         width, height = img.size
         idx = 0
