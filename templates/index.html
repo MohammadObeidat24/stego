@@ -64,10 +64,10 @@
                             <textarea id="secretText" class="form-control" rows="4" placeholder="Enter your confidential text..." required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="encryptPassword" class="form-label">Encryption Password</label>
+                            <label for="encryptPassword" class="form-label">Encryption Key</label>
                             <input type="password" id="encryptPassword" class="form-control" 
-                                   placeholder="Enter a strong password" required autocomplete="new-password">
-                            <div class="form-text">You'll need this password to extract the text later</div>
+                                   placeholder="Enter a strong key" required autocomplete="new-password">
+                            <div class="form-text">You'll need this key to extract the text later</div>
                         </div>
                         <div class="mb-3">
                             <label for="imageInput" class="form-label">Cover Image</label>
@@ -117,9 +117,9 @@
                             <div class="form-text">Select the image containing hidden text</div>
                         </div>
                         <div class="mb-3">
-                            <label for="decryptPassword" class="form-label">Decryption Password</label>
+                            <label for="decryptPassword" class="form-label">Decryption Key</label>
                             <input type="password" id="decryptPassword" class="form-control" 
-                                   placeholder="Enter the password used for encryption" required autocomplete="current-password">
+                                   placeholder="Enter the key used for encryption" required autocomplete="current-password">
                         </div>
                         <button type="submit" class="btn btn-success w-100 py-2">
                             <i class="bi bi-unlock"></i> Extract Text
