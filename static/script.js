@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Inject splash logo dynamically into #introScreen
+    const intro = document.getElementById('introScreen');
+    if (intro) {
+        const logo = document.createElement('img');
+        logo.src = "{{ url_for('static', filename='secure-text-hider-logo.png') }}";
+        logo.alt = "Secure Text Hider Logo";
+        logo.id = "splashLogo";
+        logo.className = "img-fluid splash-animate";
+        logo.style.maxWidth = "720px";
+        logo.style.display = "block";
+        logo.style.margin = "0 auto";
+        
+        intro.appendChild(logo);
+    }
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
