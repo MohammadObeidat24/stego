@@ -12,7 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
         logo.style.margin = "0 auto";
         
         intro.appendChild(logo);
+        setTimeout(() => {
+            logo.classList.add("splash-animate");
+        }, 100); // تأخير بسيط لتفعيل الأنيميشن
     }
+
+    
     // Initialize tooltips
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
