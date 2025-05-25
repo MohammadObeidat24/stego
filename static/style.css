@@ -324,16 +324,17 @@ body {
 }
 
 /* تحريك زوم إن */
-@keyframes fadeInLogo {
+@keyframes zoomInSmooth {
   0% {
-    opacity: 0;
-    transform: scale(0.95);
+    transform: scale(1);
+    opacity: 1;
   }
   100% {
+    transform: scale(1.2);
     opacity: 1;
-    transform: scale(1);
   }
 }
+
 
 /* تحكم عام بالسبلاش */
 #introScreen {
@@ -353,10 +354,10 @@ body {
 
 /* الشعار */
 #introScreen img.splash-animate {
-  animation: fadeInLogo 1.2s ease-in-out forwards;
-  transform: none !important;
+  animation: zoomInSmooth 1s ease forwards;
   position: relative;
 }
+
 #splashLogo {
   transform-origin: center center;
   will-change: transform;
