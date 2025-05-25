@@ -212,6 +212,11 @@ def api_hide():
             return jsonify({'error': 'Text and password required'}), 400
         if len(password) < 6:
             return jsonify({'error': 'Password must be at least 6 characters'}), 400
+            
+        MAX_TEXT_LENGTH = 10000
+        if len(text) > MAX_TEXT_LENGTH:
+            return jsonify({'error': 'Text is too long'}), 400
+            
         expiry = None
         if request.form.get('enableTimer') == 'true':
             expiry = datetime.now() + timedelta(
