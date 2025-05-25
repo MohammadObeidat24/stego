@@ -22,7 +22,10 @@
     z-index: 9999;
     transition: opacity 1s ease;
   }
-
+  @keyframes zoomInSmooth {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.2); opacity: 1; }
+  }
   body.dark-mode {
     background-image: url('{{ url_for("static", filename="site-background-dark.png") }}');
     background-size: cover;
