@@ -210,7 +210,8 @@ def api_hide():
         
         if not text or not password:
             return jsonify({'error': 'Text and password required'}), 400
-        
+        if len(password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
         expiry = None
         if request.form.get('enableTimer') == 'true':
             expiry = datetime.now() + timedelta(
@@ -266,6 +267,9 @@ def api_extract():
         
         if not password:
             return jsonify({'error': 'Password required'}), 400
+        if len(password) < 6:
+            return jsonify({'error': 'Password must be at least 6 characters'}), 400
+
         
         temp_path = f"temp_{image.filename}"
         image.save(temp_path)
