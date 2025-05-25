@@ -22,6 +22,16 @@
   #splashLogo.splash-animate {
     animation: zoomInSmooth 1s ease forwards;
   }
+
+  body.dark-mode {
+    background-image: url('{{ url_for("static", filename="site-background-dark.png") }}');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #000;
+  }
+    
   </style>
 </head>
 <body>
