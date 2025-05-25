@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         logo.src = "/static/secure-text-hider-logo.png";
         logo.alt = "Secure Text Hider Logo";
         logo.id = "splashLogo";
-        logo.className = "img-fluid splash-animate";
+        logo.className = "img-fluid";
         logo.style.maxWidth = "720px";
         logo.style.display = "block";
         logo.style.margin = "0 auto";
