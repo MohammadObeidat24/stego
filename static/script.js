@@ -13,7 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         intro.appendChild(logo);
         setTimeout(() => {
-            logo.classList.add("splash-animate");
+            logo.classList.add("splash-animate"); // يبدأ الزوم إن
+
+            setTimeout(() => {
+                intro.style.opacity = '0'; // يبدأ التلاشي بعد انتهاء الزوم
+
+                setTimeout(() => {
+                    intro.remove(); // بعد انتهاء التلاشي، احذف العنصر من الصفحة
+                }, 1000);
+            }, 1500);
         }, 100); // تأخير بسيط لتفعيل الأنيميشن
     }
 
