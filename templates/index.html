@@ -25,7 +25,10 @@
   </style>
 </head>
 <body>
-  
+   <audio id="xp-sound" autoplay>
+        <source src="{{ url_for('static', filename='Startup.mp3') }}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 <div id="introScreen" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
      style="background: linear-gradient(to bottom right, #f3e5f5, #ede7f6); z-index: 9999;">
     <img id="splashLogo"
