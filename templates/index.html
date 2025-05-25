@@ -26,7 +26,7 @@
 </head>
 <body>
 <audio id="xp-sound" autoplay>
-  <source src="{{ url_for('static', filename='0525.mp3') }}" type="audio/mpeg">
+  <source src="{{ url_for('static', filename='startup.mp3') }}" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
 <div id="introScreen" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
@@ -155,7 +155,7 @@
 </script>
 <script>
   window.addEventListener('DOMContentLoaded', () => {
-    const audio = document.getElementById('0525');
+    const audio = document.getElementById('xp-sound');
     // نحاول تشغيل الصوت تلقائيًا
     const playPromise = audio.play();
 
