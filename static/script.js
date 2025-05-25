@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const intro = document.getElementById('introScreen');
     if (intro) {
         const logo = document.createElement('img');
-        logo.src = "{{ url_for('static', filename='secure-text-hider-logo.png') }}";
+        logo.src = "/static/secure-text-hider-logo.png";
         logo.alt = "Secure Text Hider Logo";
         logo.id = "splashLogo";
         logo.className = "img-fluid splash-animate";
