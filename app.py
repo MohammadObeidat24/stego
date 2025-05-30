@@ -13,20 +13,14 @@ import time
 
 app = Flask(__name__)
 
-
-#سيتينق الفايل ابلود
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
-#ماكسيمام 8 ميجا عشان ما يعلق
 
 
-#خاصية التشفير aes
-#256 bit
+
 KEY_SIZE = 32
-#سايز الكي
 BLOCK_SIZE = 16  
 
-#ضص
 
 
 def encrypttext(text, password):
@@ -54,13 +48,12 @@ def decrypttext(encrypted_text, password):
 
 
 def geo_distance_km(lat1, lon1, lat2, lon2):
-    #التشييك على المسافه بين مكان التشفير وفك التشفير
+  
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
     d_lat = lat2 - lat1
     d_lon = lon2 - lon1
     a = math.sin(d_lat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(d_lon/2)**2
     c = 2 * math.asin(math.sqrt(a))
-    #نصف القطر
     r = 6371  
     return c * r
 
@@ -80,8 +73,8 @@ def hide_text_image(image_path, text, password, expiry=None, location=None):
         json_payload = json.dumps(payload)
         binary_payload = ''.join(format(ord(c), '08b') for c in json_payload) + '00000000'
 
-        # ✅ التحقق من سعة الصورة
-        max_capacity = img.width * img.height * 3  # 3 بت في كل بكسل (R, G, B)
+       
+        max_capacity = img.width * img.height * 3 
         if len(binary_payload) > max_capacity:
             raise ValueError("Image is too small to hide this message. Please use a larger image or shorter text.")
 
@@ -131,7 +124,7 @@ def extract_hidden_image(image_path, password):
         pix = img.load()
         width, height = img.size
         
-        found_terminator = False  # علم لإيقاف الحلقة عندما نجد النهاية
+        found_terminator = False 
 
         for y in range(height):
             for x in range(width):
@@ -140,7 +133,7 @@ def extract_hidden_image(image_path, password):
                 binary_string += str(g & 1)
                 binary_string += str(b & 1)
 
-                # ✅ نتأكد كل فترة صغيرة إذا ظهرت نهاية البيانات
+            
                 if '00000000' in binary_string[-24:]:
                     found_terminator = True
                     break
@@ -248,7 +241,7 @@ def api_hide():
         return jsonify({'error': str(e)}), 500
     
     finally:
-        if temp_path and os.path.exists(temp_path):  # ✅ نحذف الملف المؤقت دائمًا
+        if temp_path and os.path.exists(temp_path): 
             os.remove(temp_path)
 
 
@@ -293,7 +286,7 @@ def api_extract():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        if temp_path and os.path.exists(temp_path):  # ✅ الحذف مضمون
+        if temp_path and os.path.exists(temp_path): 
             os.remove(temp_path)
 
 if __name__ == '__main__':
