@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Inject splash logo dynamically into #introScreen
+
     const intro = document.getElementById('introScreen');
     if (intro) {
         const logo = document.createElement('img');
@@ -13,29 +13,29 @@ document.addEventListener('DOMContentLoaded', function() {
         
         intro.appendChild(logo);
         setTimeout(() => {
-            logo.classList.add("splash-animate"); // يبدأ الزوم إن
+            logo.classList.add("splash-animate");
 
             setTimeout(() => {
-                intro.style.opacity = '0'; // يبدأ التلاشي بعد انتهاء الزوم
+                intro.style.opacity = '0';
 
                 setTimeout(() => {
-                    intro.remove(); // بعد انتهاء التلاشي، احذف العنصر من الصفحة
+                    intro.remove();
                 }, 3000);
             }, 3000);
-        }, 3000); // تأخير بسيط لتفعيل الأنيميشن
+        }, 3000);
     }
 
     
-    // Initialize tooltips
+
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
-    // Timer toggle
+
     document.getElementById('enableTimer').addEventListener('change', function() {
         document.getElementById('timeFields').style.display = this.checked ? 'block' : 'none'
     })
 
-    // Location toggle
+
     document.getElementById('enableLocation').addEventListener('change', function() {
         if (this.checked && !navigator.geolocation) {
             alert('Geolocation is not supported by your browser')
@@ -43,20 +43,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     })
 
-    // Dark mode toggle
+
     const darkModeToggle = document.getElementById('darkModeToggle')
     darkModeToggle.addEventListener('change', function() {
         document.body.classList.toggle('dark-mode', this.checked)
         localStorage.setItem('darkMode', this.checked)
     })
 
-    // Load dark mode preference
+  
     if (localStorage.getItem('darkMode') === 'true') {
         darkModeToggle.checked = true
         document.body.classList.add('dark-mode')
     }
 
-    // Hide form submission
+
     document.getElementById('hideForm').addEventListener('submit', async function(e) {
         e.preventDefault()
         
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     })
 
-    // Extract form submission - Fixed version
+
     document.getElementById('extractForm').addEventListener('submit', async function(e) {
         e.preventDefault()
         console.log('Starting extraction process...')
@@ -152,20 +152,19 @@ document.addEventListener('DOMContentLoaded', function() {
         `
 
         try {
-            // 1. Validate inputs
             const imageFile = document.getElementById('hiddenImage').files[0]
             const password = document.getElementById('decryptPassword').value
             
             if (!imageFile) throw new Error('Please select an image file')
             if (!password) throw new Error('Please enter the password')
 
-            // 2. Prepare FormData
+
             const formData = new FormData()
             formData.append('image', imageFile)
             formData.append('password', password)
             console.log('FormData prepared with image size:', imageFile.size)
 
-            // 3. Get location (optional)
+
             let position;
             try {
                 position = await new Promise((resolve, reject) => {
@@ -181,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Proceeding without location:', geoError.message)
             }
 
-            // 4. Show extracting status
+
             resultDiv.innerHTML = `
                 <div class="alert alert-info">
                     <div class="spinner-border spinner-border-sm me-2"></div>
@@ -189,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `
 
-            // 5. Send to server with timeout
+
             const controller = new AbortController()
             const timeoutId = setTimeout(() => {
                 if (!controller.signal.aborted) {
@@ -214,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json()
             console.log('Extraction result:', result)
 
-            // 6. Display result
+
             resultDiv.innerHTML = `
                 <div class="alert alert-success">
                     <h5><i class="bi bi-check-circle"></i> Extraction Successful!</h5>
@@ -250,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     })
 
-    // File validation
+
     document.getElementById('imageInput').addEventListener('change', function() {
         if (this.files[0]?.size > 8 * 1024 * 1024) {
             alert('Maximum file size is 8MB. Please choose a smaller image.')
