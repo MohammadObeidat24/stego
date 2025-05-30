@@ -164,10 +164,10 @@
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     const audio = document.getElementById('xp-sound');
-    // نحاول تشغيل الصوت تلقائيًا
+
     const playPromise = audio.play();
 
-    // بعض المتصفحات تتطلب تفاعل المستخدم، فنضع تنبيه لو تم المنع
+
     if (playPromise !== undefined) {
       playPromise.catch(error => {
         console.warn('Autoplay prevented by browser. Will play on user interaction.');
