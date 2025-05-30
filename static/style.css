@@ -7,7 +7,6 @@
     --nahdi-danger: #c2185b;
 }
 
-/* Smooth appearance animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -27,7 +26,6 @@ body {
     animation: fadeInUp 0.8s ease-out;
 }
 
-/* Header with gradient and shadow */
 .card-header {
     background: linear-gradient(to right, #6f42c1, #9c27b0);
     color: white;
@@ -41,14 +39,13 @@ body {
     margin: 0;
 }
 
-/* Footer styling */
 .card-footer {
     background-color: #ede7f6;
     font-size: 0.85rem;
     border-top: 1px solid #d1c4e9;
 }
 
-/* Card Styling */
+
 .card {
     border: none;
     border-radius: 12px;
@@ -61,7 +58,7 @@ body {
     padding: 2rem;
 }
 
-/* Form Elements */
+
 .form-control, .form-select {
     border-radius: 8px;
     padding: 0.75rem 1rem;
@@ -87,7 +84,6 @@ body {
     color: #6c757d;
 }
 
-/* Buttons */
 .btn {
     border-radius: 8px;
     font-weight: 500;
@@ -122,7 +118,7 @@ body {
     transform: translateY(-1px);
 }
 
-/* Tabs */
+
 .nav-tabs {
     border-bottom: 2px solid #dee2e6;
 }
@@ -150,7 +146,6 @@ body {
     border-bottom: 3px solid var(--nahdi-primary);
 }
 
-/* Accordion */
 .accordion-button {
     font-weight: 500;
 }
@@ -160,7 +155,6 @@ body {
     background-color: rgba(111, 66, 193, 0.05);
 }
 
-/* Time Fields */
 .time-fields {
     background-color: rgba(111, 66, 193, 0.05);
     border-radius: 8px;
@@ -169,7 +163,7 @@ body {
     display: none;
 }
 
-/* Result Box */
+
 .result-box {
     background-color: rgba(156, 39, 176, 0.1);
     border-radius: 8px;
@@ -177,7 +171,7 @@ body {
     border-left: 4px solid var(--nahdi-success);
 }
 
-/* Alerts */
+
 .alert {
     border-radius: 8px;
     padding: 1rem;
@@ -195,7 +189,7 @@ body {
     color: var(--nahdi-dark);
 }
 
-/* Responsive Adjustments */
+
 @media (max-width: 768px) {
     .card-body {
         padding: 1.5rem;
@@ -208,7 +202,7 @@ body {
 }
 
 
-/* Dark Mode Support */
+
 body.dark-mode {
     background-color: #121212;
     color: #f8f9fa;
@@ -287,17 +281,17 @@ body.dark-mode .alert-danger {
 }
 
 
-/* إصلاح لون العناوين (Labels) */
+
 body.dark-mode .form-label {
     color: #e0d7f3;
 }
 
-/* إصلاح لون النصوص الإرشادية */
+
 body.dark-mode .form-text {
     color: #cfcfcf;
 }
 
-/* تحسين لون زر تفعيل الوضع الداكن */
+
 body.dark-mode .form-check-label {
     color: #e0d7f3 !important;
 }
@@ -306,7 +300,7 @@ body:not(.dark-mode) .form-check-label {
     color: #4a148c;
 }
 
-/* دعم الحالات التي يكون فيها label بجانب الـ input */
+
 #darkModeToggle:checked ~ .form-check-label {
     color: #e0d7f3 !important;
 }
@@ -323,7 +317,7 @@ body {
     background-size: cover;
 }
 
-/* تحريك زوم إن */
+
 @keyframes zoomAndFade {
   0% {
     transform: scale(1);
@@ -339,7 +333,7 @@ body {
   animation: zoomAndFade 1.5s ease forwards;
 }
 
-/* تحكم عام بالسبلاش */
+
 #introScreen {
   transition: opacity 1.5s ease;
   z-index: 9999;
@@ -355,7 +349,7 @@ body {
 }
 
 
-/* الشعار */
+
 #introScreen img.splash-animate {
   animation: zoomInSmooth 1s ease forwards;
   position: relative;
