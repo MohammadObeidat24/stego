@@ -1,4 +1,4 @@
 Flask==2.3.2
 Pillow==10.0.0
-pycryptodome==3.18.0
+pycryptodome==3.19.1
 gunicorn==23.0.0
